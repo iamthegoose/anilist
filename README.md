@@ -31,3 +31,15 @@ anilist-bot
 - `/list` - show watched anime.
 - `/help` - show available actions.
 
+## Project Structure
+
+```text
+src/anilist_bot/
+  application/          use cases, settings, app-level services
+  domain/               core models and repository contracts
+  infrastructure/       JSON storage and future external integrations
+  presentation/telegram Telegram router, handlers, and response formatting
+    handlers/            one Telegram handler module per command/event group
+  main.py               composition root and CLI entrypoint
+tests/                  unit tests for services and storage
+```

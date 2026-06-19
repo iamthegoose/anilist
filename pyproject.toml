@@ -20,7 +20,7 @@ dev = [
 ]
 
 [project.scripts]
-anilist-bot = "anilist_bot.bot:main"
+anilist-bot = "anilist_bot.main:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

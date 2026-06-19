@@ -1,10 +1,10 @@
 import json
 from pathlib import Path
 
-from anilist_bot.models import AnimeEntry
+from anilist_bot.domain.anime import AnimeEntry
 
 
-class AnimeStorage:
+class JsonAnimeRepository:
     def __init__(self, path: Path) -> None:
         self._path = path
 

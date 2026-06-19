@@ -1,11 +1,11 @@
 import asyncio
 
-from anilist_bot.models import AnimeEntry
-from anilist_bot.storage import AnimeStorage
+from anilist_bot.domain.anime import AnimeEntry
+from anilist_bot.infrastructure.storage.json_storage import JsonAnimeRepository
 
 
 def test_storage_keeps_entries_scoped_by_user(tmp_path):
-    storage = AnimeStorage(tmp_path / "anime.json")
+    storage = JsonAnimeRepository(tmp_path / "anime.json")
 
     asyncio.run(
         storage.add(
