@@ -3,7 +3,7 @@ from aiogram.types import Message
 
 from anilist_bot.application.media_library_service import MediaLibraryService
 from anilist_bot.presentation.telegram.i18n import added_message, text
-from anilist_bot.presentation.telegram.keyboards import ALL_BUTTON_TEXTS, main_menu
+from anilist_bot.presentation.telegram.keyboards import ALL_BUTTON_TEXTS, edit_menu, main_menu
 
 
 def build_add_media_router(media_library: MediaLibraryService) -> Router:
@@ -28,7 +28,7 @@ def build_add_media_router(media_library: MediaLibraryService) -> Router:
         )
         await message.answer(
             added_message(profile.language, entry),
-            reply_markup=main_menu(profile.language),
+            reply_markup=edit_menu(profile.language),
         )
 
     @router.message(F.text)
@@ -41,7 +41,7 @@ def build_add_media_router(media_library: MediaLibraryService) -> Router:
         entry = await media_library.add_text_entry(user_id=message.from_user.id, text=title)
         await message.answer(
             added_message(profile.language, entry),
-            reply_markup=main_menu(profile.language),
+            reply_markup=edit_menu(profile.language),
         )
 
     return router

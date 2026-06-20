@@ -15,7 +15,8 @@ MESSAGES: dict[Language, dict[str, str]] = {
             "2. Надішли назву текстом або фото з назвою в caption.\n"
             "3. Додай теги через #, наприклад: <code>#переглянуто #романтика</code>.\n\n"
             "Статуси: <code>#переглянуто</code>, <code>#хочу</code>, "
-            "<code>#дивлюсь</code>, <code>#закинуто</code>."
+            "<code>#дивлюсь</code>, <code>#закинуто</code>.\n"
+            "Примітка: додай <code>@зупинився на 8 серії</code> в кінці назви."
         ),
         "language_menu": "🌍 Обери мову інтерфейсу:",
         "language_updated": "✅ Мову змінено.",
@@ -34,6 +35,13 @@ MESSAGES: dict[Language, dict[str, str]] = {
         "empty_anime": "📭 У списку аніме поки порожньо.",
         "empty_movie": "📭 У списку фільмів поки порожньо.",
         "stats_empty": "📊 Поки немає записів для статистики.",
+        "edit_menu_empty": "✏️ Поки немає останнього запису для редагування.",
+        "edit_menu": "✏️ <b>Редагування останнього запису</b>\n\n{entry}",
+        "edit_title_prompt": "Надішли нову назву для останнього запису.",
+        "edit_note_prompt": "Надішли примітку. Наприклад: <code>зупинився на 8 серії</code>.",
+        "edit_tags_prompt": "Надішли теги через # або кому. Наприклад: <code>#романтика #драма</code>.",
+        "edit_cancelled": "Готово, повернув головне меню.",
+        "entry_updated": "✅ Запис оновлено:\n\n{entry}",
         "unknown": "Я не впізнав дію. Скористайся меню знизу або /help.",
     },
     "en": {
@@ -47,7 +55,8 @@ MESSAGES: dict[Language, dict[str, str]] = {
             "2. Send a title as text or a photo with the title in caption.\n"
             "3. Add tags with #, for example: <code>#watched #romance</code>.\n\n"
             "Statuses: <code>#watched</code>, <code>#want</code>, "
-            "<code>#watching</code>, <code>#dropped</code>."
+            "<code>#watching</code>, <code>#dropped</code>.\n"
+            "Note: add <code>@stopped at episode 8</code> at the end."
         ),
         "language_menu": "🌍 Choose interface language:",
         "language_updated": "✅ Language updated.",
@@ -66,6 +75,13 @@ MESSAGES: dict[Language, dict[str, str]] = {
         "empty_anime": "📭 Your anime list is empty for now.",
         "empty_movie": "📭 Your movie list is empty for now.",
         "stats_empty": "📊 No entries yet for stats.",
+        "edit_menu_empty": "✏️ There is no last entry to edit yet.",
+        "edit_menu": "✏️ <b>Edit last entry</b>\n\n{entry}",
+        "edit_title_prompt": "Send the new title for the last entry.",
+        "edit_note_prompt": "Send a note. Example: <code>stopped at episode 8</code>.",
+        "edit_tags_prompt": "Send tags with # or commas. Example: <code>#romance #drama</code>.",
+        "edit_cancelled": "Done, back to the main menu.",
+        "entry_updated": "✅ Entry updated:\n\n{entry}",
         "unknown": "I did not recognize that action. Use the bottom menu or /help.",
     },
 }
@@ -96,22 +112,22 @@ def text(language: Language, key: str) -> str:
 
 
 def added_message(language: Language, entry: MediaEntry) -> str:
+    body = entry_details(language, entry)
     media = MEDIA_LABELS[language][entry.media_type]
-    status = STATUS_LABELS[language][entry.status]
-    tags = _tags_line(language, entry.tags)
     if language == "uk":
-        return (
-            f"✅ Додав {media}:\n"
-            f"<b>{escape(entry.title)}</b>\n"
-            f"🏷 Статус: <b>{status}</b>"
-            f"{tags}"
-        )
+        return f"✅ Додав {media}:\n{body}"
 
+    return f"✅ Added {media}:\n{body}"
+
+
+def entry_details(language: Language, entry: MediaEntry) -> str:
+    status = STATUS_LABELS[language][entry.status]
+    status_label = "Статус" if language == "uk" else "Status"
     return (
-        f"✅ Added {media}:\n"
         f"<b>{escape(entry.title)}</b>\n"
-        f"🏷 Status: <b>{status}</b>"
-        f"{tags}"
+        f"🏷 {status_label}: <b>{status}</b>"
+        f"{_tags_line(language, entry.tags)}"
+        f"{_note_line(language, entry.note)}"
     )
 
 
@@ -126,6 +142,7 @@ def media_list_message(language: Language, media_type: MediaType, entries: list[
         (
             f"{index}. <b>{escape(entry.title)}</b>\n"
             f"   {STATUS_LABELS[language][entry.status]}{_inline_tags(entry.tags)}"
+            f"{_inline_note(language, entry.note)}"
         )
         for index, entry in enumerate(entries, start=1)
     ]
@@ -156,6 +173,14 @@ def stats_message(language: Language, entries: list[MediaEntry]) -> str:
     )
 
 
+def edit_menu_message(language: Language, entry: MediaEntry) -> str:
+    return text(language, "edit_menu").format(entry=entry_details(language, entry))
+
+
+def entry_updated_message(language: Language, entry: MediaEntry) -> str:
+    return text(language, "entry_updated").format(entry=entry_details(language, entry))
+
+
 def _tags_line(language: Language, tags: list[str]) -> str:
     if not tags:
         return ""
@@ -163,7 +188,21 @@ def _tags_line(language: Language, tags: list[str]) -> str:
     return f"\n🏷 {label}: " + ", ".join(f"#{escape(tag)}" for tag in tags)
 
 
+def _note_line(language: Language, note: str | None) -> str:
+    if not note:
+        return ""
+    label = "Примітка" if language == "uk" else "Note"
+    return f"\n📝 {label}: {escape(note)}"
+
+
 def _inline_tags(tags: list[str]) -> str:
     if not tags:
         return ""
     return " · " + " ".join(f"#{escape(tag)}" for tag in tags)
+
+
+def _inline_note(language: Language, note: str | None) -> str:
+    if not note:
+        return ""
+    label = "примітка" if language == "uk" else "note"
+    return f"\n   📝 {label}: {escape(note)}"

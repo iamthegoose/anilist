@@ -17,6 +17,24 @@ class JsonMediaRepository:
         state.entries = entries
         self._write_state(state)
 
+    async def update(self, entry: MediaEntry) -> None:
+        state = self._read_state()
+        state.entries = [
+            entry if item.user_id == entry.user_id and item.id == entry.id else item
+            for item in state.entries
+        ]
+        self._write_state(state)
+
+    async def get_by_id(self, user_id: int, entry_id: str) -> MediaEntry | None:
+        return next(
+            (
+                entry
+                for entry in self._read_state().entries
+                if entry.user_id == user_id and entry.id == entry_id
+            ),
+            None,
+        )
+
     async def list_by_user(
         self,
         user_id: int,
@@ -100,5 +118,6 @@ def _entry_from_legacy(raw_entry: dict[str, Any]) -> MediaEntry:
             "media_type": raw_entry.get("media_type", "anime"),
             "status": raw_entry.get("status", "watched"),
             "tags": raw_entry.get("tags", []),
+            "note": raw_entry.get("note"),
         }
     )

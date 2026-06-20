@@ -9,6 +9,7 @@ def test_added_message_formats_and_escapes_title_for_html_parse_mode():
         media_type="anime",
         status="watched",
         tags=["fantasy"],
+        note="rewatch later",
         image="fallback",
         image_kind="fallback_url",
     )
@@ -17,7 +18,8 @@ def test_added_message_formats_and_escapes_title_for_html_parse_mode():
         "✅ Додав аніме:\n"
         "<b>Frieren &lt;Beyond Journey&#x27;s End&gt;</b>\n"
         "🏷 Статус: <b>переглянуто</b>\n"
-        "🏷 Теги: #fantasy"
+        "🏷 Теги: #fantasy\n"
+        "📝 Примітка: rewatch later"
     )
 
 
@@ -27,6 +29,7 @@ def test_media_list_message_is_user_friendly():
             user_id=1,
             title="Frieren",
             media_type="anime",
+            note="episode 8",
             image="fallback",
             image_kind="fallback_url",
         ),
@@ -43,6 +46,7 @@ def test_media_list_message_is_user_friendly():
         "📚 Your anime:\n\n"
         "1. <b>Frieren</b>\n"
         "   watched\n"
+        "   📝 note: episode 8\n"
         "2. <b>Cowboy Bebop</b>\n"
         "   watched"
     )

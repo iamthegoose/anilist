@@ -10,6 +10,7 @@ Telegram webhook bot for keeping a personal list of anime and movies.
 - Use bottom reply keyboard menus instead of inline message buttons.
 - Switch interface language between Ukrainian and English.
 - Add statuses and tags with hashtags.
+- Add notes while creating or edit them later from the bottom menu.
 - Use a fallback image URL when no photo is provided.
 - Store entries locally in a JSON file.
 - Show anime list, movie list, and stats.
@@ -55,12 +56,22 @@ Add tags with `#` in the title or photo caption:
 ```text
 Perfect Blue #watched #psychological
 Inception #want #sci-fi
+Naruto #закинуто @зупинився на 120 серії
 ```
 
 Supported status tags:
 
 - Ukrainian: `#переглянуто`, `#хочу`, `#дивлюсь`, `#закинуто`
 - English: `#watched`, `#want`, `#watching`, `#dropped`
+
+Add a note at the end with `@`. This is useful for dropped or paused titles:
+
+```text
+One Piece #дивлюсь @арка Water 7
+```
+
+After adding an entry, use `✏️ Останній запис` / `✏️ Last entry` to edit title, status,
+tags, or note later.
 
 ## Project Structure
 
