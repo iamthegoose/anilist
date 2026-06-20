@@ -13,16 +13,20 @@ Telegram bot for keeping a personal list of watched anime.
 ## Setup
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -e .
+rye sync
 cp .env.example .env
 ```
 
 Fill `TELEGRAM_BOT_TOKEN` in `.env`, then run:
 
 ```bash
-anilist-bot
+rye run bot
+```
+
+Run tests:
+
+```bash
+rye run test
 ```
 
 ## Commands

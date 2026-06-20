@@ -14,13 +14,18 @@ dependencies = [
     "python-dotenv>=1.0,<2.0",
 ]
 
-[project.optional-dependencies]
-dev = [
+[project.scripts]
+anilist-bot = "anilist_bot.main:main"
+
+[tool.rye]
+managed = true
+dev-dependencies = [
     "pytest>=8.0,<9.0",
 ]
 
-[project.scripts]
-anilist-bot = "anilist_bot.main:main"
+[tool.rye.scripts]
+bot = "anilist-bot"
+test = "pytest"
 
 [tool.setuptools.packages.find]
 where = ["src"]
