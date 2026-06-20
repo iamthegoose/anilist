@@ -1,4 +1,4 @@
-"""Telegram bot for tracking watched anime."""
+"""Telegram bot for tracking anime and movies."""
 
 __all__ = ["__version__"]
 

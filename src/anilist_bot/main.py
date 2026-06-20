@@ -5,10 +5,12 @@ import sys
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
+from aiohttp import web
 
-from anilist_bot.application.anime_list_service import AnimeListService
+from anilist_bot.application.media_library_service import MediaLibraryService
 from anilist_bot.application.settings import get_settings
-from anilist_bot.infrastructure.storage.json_storage import JsonAnimeRepository
+from anilist_bot.infrastructure.storage.json_storage import JsonMediaRepository
 from anilist_bot.presentation.telegram.router import build_router
 
 
@@ -26,11 +28,41 @@ async def run() -> None:
         default=DefaultBotProperties(parse_mode=ParseMode.HTML),
     )
     dispatcher = Dispatcher()
-    repository = JsonAnimeRepository(settings.data_file)
-    anime_lists = AnimeListService(repository, settings.fallback_image_url)
+    repository = JsonMediaRepository(settings.data_file)
+    media_library = MediaLibraryService(repository, settings.fallback_image_url)
 
-    dispatcher.include_router(build_router(anime_lists))
-    await dispatcher.start_polling(bot)
+    dispatcher.include_router(build_router(media_library))
+    dispatcher.startup.register(_set_webhook)
+    dispatcher.shutdown.register(_delete_webhook)
+
+    app = web.Application()
+    app["bot"] = bot
+    app["settings"] = settings
+    SimpleRequestHandler(
+        dispatcher=dispatcher,
+        bot=bot,
+        secret_token=settings.secret_token,
+    ).register(app, path=settings.webhook_path)
+    setup_application(app, dispatcher, bot=bot)
+
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, host=settings.web_server_host, port=settings.web_server_port)
+    await site.start()
+    await asyncio.Event().wait()
+
+
+async def _set_webhook(bot: Bot, **_: object) -> None:
+    settings = get_settings()
+    await bot.set_webhook(
+        url=settings.webhook_url,
+        secret_token=settings.secret_token,
+        drop_pending_updates=True,
+    )
+
+
+async def _delete_webhook(bot: Bot, **_: object) -> None:
+    await bot.delete_webhook(drop_pending_updates=False)
 
 
 def main() -> None:
